@@ -1,0 +1,20 @@
+# Server binary
+/server
+/nextendo-bcat-nx
+*.out
+
+# Local signing key (the Nintendo-key replacement) — NEVER commit the PRIVATE key.
+bcat_signing_key.pem
+*.key
+# The PUBLIC key is safe to share (it goes in the module), but keep it out by default.
+*.pub.pem
+*.pub.der
+
+# TLS
+cert.pem
+key.pem
+*.pem
+
+# Delivery-cache content (captured game data) and local config
+/content/
+.env
