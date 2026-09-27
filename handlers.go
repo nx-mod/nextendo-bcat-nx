@@ -64,6 +64,8 @@ func (s *bcatServer) route(w http.ResponseWriter, r *http.Request) {
 		s.handleData(w, r)
 	case strings.HasPrefix(host, "bcat-topics") || strings.HasPrefix(path, "/topics"):
 		s.handleTopics(w, r)
+	case strings.HasPrefix(path, "/news"):
+		s.handleNews(w, r)
 	case path == "/healthz":
 		fmt.Fprintln(w, "ok")
 	default:
@@ -173,7 +175,16 @@ func (s *bcatServer) handleData(w http.ResponseWriter, r *http.Request) {
 func (s *bcatServer) handleTopics(w http.ResponseWriter, r *http.Request) {
 	s.topicReqs.Add(1)
 	title, _ := titleFrom(r)
-	writeJSON(w, map[string]any{"titleId": titleHex(title), "topics": []string{}})
+	// Surface the news feed as topics, so a topics fetch carries the Nextendo
+	// news (by default "nextendo news test"). See news.go.
+	news := currentNews()
+	topics := make([]map[string]any, 0, len(news))
+	for _, n := range news {
+		topics = append(topics, map[string]any{
+			"id": n.ID, "title": n.Title, "message": n.Message, "time": n.Time,
+		})
+	}
+	writeJSON(w, map[string]any{"titleId": titleHex(title), "topics": topics})
 }
 
 func writeJSON(w http.ResponseWriter, v any) {

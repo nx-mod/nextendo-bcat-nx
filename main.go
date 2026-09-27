@@ -58,8 +58,12 @@ func envOrInt(key string, def int) int {
 	return def
 }
 
+var newsPath = envOr("BCAT_NEWS", "news.json")
+
 func main() {
 	log.SetOutput(os.Stdout)
+
+	loadNews(newsPath)
 
 	key, err := loadOrCreateKey(keyPath)
 	if err != nil {
