@@ -14,12 +14,13 @@ BCAT is how Switch games pull background data — seasonal content, shared maps,
 
 - **Delivery cache from disk.** Content lives at `BCAT_CONTENT/<titleid-hex>/<directory>/<file>` (plus an optional `passphrase` file per title). The server scans it and serves an index (list) of directories, files, sizes and digests.
 - **Signed containers.** Each data file is served wrapped in a BCAT content container (`bcat` magic, optional AES-CTR, RSA-2048 signature, PBKDF2-HMAC-SHA256 key derivation) — the format switchbrew documents.
-- **The local key = the Nintendo-key replacement.** A stock console verifies every container against Nintendo's RSA-2048 public key baked into `nn::bcat`. The companion on-console module (**bcat-mitm**) replaces that key with this server's local one, so containers signed here with the matching private key are accepted. The private key stays on the server; `server pubkey` prints the modulus to embed in the module, and the key file's `.pub.der` is written beside it on first run.
+- **Accepted by the console.** A stock console verifies every container against Nintendo's key. The `nextendo_bcat_sig` Atmosphère patch (bcat 22.5.0, installed by nextendo-nx) makes its signature check pass, so containers signed here are accepted. (Swapping the key itself, bcat-mitm, is not possible on 22.5.0: the key is not a static blob.)
+- **News.** The HOME menu's News — channel catalog, channel lists, items — in the console's own formats. News items are one JSON file each: see **[NEWS.md](NEWS.md)**.
 
 ```
 console ── HTTPS ──▶ sni-router ──▶ nextendo-bcat-nx ──▶ signed container
-   ▲                                                         │
-   └── bcat-mitm swaps Nintendo's verify key for this one ───┘
+                                        ▲
+                         stack/news/*.json (News items)
 ```
 
 ## Run
@@ -58,12 +59,11 @@ The companion **bcat-mitm** module (the on-console key replacement) is a separat
 
 ## Credits
 
-- **[Nextendo Network](https://nextendo.network)** — the stack (sni-router, dashboard) this plugs into.
+- **[CrustySean/BCAT-Toolbox](https://github.com/CrustySean/BCAT-Toolbox)** (based on **[Random06457](https://github.com/Random06457)**'s BCAT-Manager) — the News formats: catalog, channel lists, news records, container layout.
+- **[kinnay/NintendoClients wiki](https://github.com/kinnay/NintendoClients/wiki/BCAT-Servers)** — the BCAT server endpoints.
 - **[switchbrew](https://switchbrew.org/wiki/BCAT_services)** — the BCAT service and content-container documentation.
 - **[D3fau4/d4c-emu](https://github.com/D3fau4/d4c-emu)** and **yuzu's Boxcat** — BCAT server references.
 
-Protocol facts were read and reimplemented; no code was copied.
+Formats were read and reimplemented; no code was copied.
 
-## Credits
-
-Built by nx-mod for the **Nextendo Network**, on the work of the Nextendo Network team — https://nextendo.network. Nextendo is awesome.
+Built by nx-mod for the **Nextendo Network**, on the work of the whole Nextendo Network team — https://nextendo.network. Nextendo is awesome.

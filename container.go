@@ -132,6 +132,7 @@ func buildContainer(p containerParams, plaintext []byte, key *rsa.PrivateKey) ([
 	}
 	header := make([]byte, headerSize)
 	copy(header[0:4], containerMagic)
+	header[4] = 1 // version: bcat rejects anything else (0xA47A, 22.5.0 disassembly)
 	header[5] = p.CryptoType
 	header[6] = p.HashType
 	header[7] = p.SecretIdx

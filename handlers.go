@@ -57,6 +57,20 @@ func (s *bcatServer) listen() error {
 func (s *bcatServer) route(w http.ResponseWriter, r *http.Request) {
 	host := strings.ToLower(r.Host)
 	path := r.URL.Path
+	// News, in the console's own formats (newsbcat.go).
+	if strings.HasPrefix(host, "bcat-topics") && s.handleNewsTopics(w, r) {
+		return
+	}
+	if strings.HasPrefix(host, "bcat-list") && strings.HasPrefix(path, "/api/nx/v1/list/") {
+		if name := strings.TrimPrefix(path, "/api/nx/v1/list/"); !strings.HasPrefix(name, "nx_data_") {
+			s.handleNewsList(w, r, name)
+			return
+		}
+	}
+	if strings.HasPrefix(host, "bcat-data") && strings.HasPrefix(path, "/api/nx/v1/news/") {
+		s.handleNewsData(w, r)
+		return
+	}
 	switch {
 	case strings.HasPrefix(host, "bcat-list") || strings.HasPrefix(path, "/list"):
 		s.handleList(w, r)
@@ -193,8 +207,21 @@ func writeJSON(w http.ResponseWriter, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
+// logRequests logs every request with its status: the console's BCAT and News paths are learnt from these.
 func logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
+		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+		next.ServeHTTP(rec, r)
+		log.Printf("[BCAT] %s %s%s -> %d (ua=%q)", r.Method, r.Host, r.URL.RequestURI(), rec.status, r.UserAgent())
 	})
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	status int
+}
+
+func (s *statusRecorder) WriteHeader(code int) {
+	s.status = code
+	s.ResponseWriter.WriteHeader(code)
 }
