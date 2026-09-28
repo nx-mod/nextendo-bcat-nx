@@ -33,7 +33,7 @@ The console picks new items up the next time it checks (boot, sign-in, or openin
 | `footer` | small text under the body | none |
 | `date` | `YYYY-MM-DD` or `2026-09-28T10:00:00Z`; newest shows first | the file's time |
 | `channel` | `news` (main feed, everyone sees it), `notice` (notices), `nextendo` (the Nextendo channel, found under **Find channels**) | `news` |
-| `image` | another image file in the folder to use | `<name>.jpg` if it exists, else a plain red square |
+| `image` | another image file in the folder to use | `<name>.jpg` if it exists, else `default.jpg` (the logo) |
 | `picture` | `true` also shows the image full size in the body | `false` |
 | `button` | a button under the item (below) | none |
 | `movie` | a video URL in the body (untested) | none |

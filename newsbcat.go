@@ -144,7 +144,11 @@ func parseNewsDate(s, path string) time.Time {
 var defaultImage []byte
 
 // defaultNewsImage is a plain Nextendo-red 256x256 JPEG, for items without an image.
+// defaultNewsImage is BCAT_NEWS_DIR/default.jpg (the logo), else a plain red square.
 func defaultNewsImage() []byte {
+	if b, err := os.ReadFile(filepath.Join(newsDir, "default.jpg")); err == nil && len(b) > 0 {
+		return b
+	}
 	if defaultImage == nil {
 		m := image.NewRGBA(image.Rect(0, 0, 256, 256))
 		draw.Draw(m, m.Bounds(), &image.Uniform{color.RGBA{230, 0, 18, 255}}, image.Point{}, draw.Src)
