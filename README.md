@@ -1,5 +1,7 @@
 # nextendo-bcat-nx
 
+**A new service implementation by nx-mod** for the Nextendo Network.
+
 BCAT (the Switch **d4c** delivery-cache service) for [Nextendo Network](https://nextendo.network), so a title's background content comes from the stack instead of Nintendo's CDN. Source only — no game data, no keys, no certs. Not affiliated with Nintendo.
 
 ## Why
