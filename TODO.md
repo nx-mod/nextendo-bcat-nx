@@ -9,6 +9,8 @@
 
 - **Game BCAT data**: `list/nx_data_<title>` still answers invented JSON; serve BCAT-Toolbox's `BcatList` format.
 - **Per-game News channels**: `"game": "<title id>"` in a news file; Diablo III first.
+- **`expired` channels**: lists always say `in_service`; add a way to retire a channel (`service_status: expired`)
+  and find out what the console then does with its items.
 - **Unknowns**: `shop` button `query` format; `movie` items; `mode`/`digest` values.
 - **Remove** the old `/news` JSON and `news.json` once News works.
 
