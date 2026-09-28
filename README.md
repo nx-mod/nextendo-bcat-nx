@@ -59,3 +59,7 @@ The companion **bcat-mitm** module (the on-console key replacement) is a separat
 - **[D3fau4/d4c-emu](https://github.com/D3fau4/d4c-emu)** and **yuzu's Boxcat** — BCAT server references.
 
 Protocol facts were read and reimplemented; no code was copied.
+
+## Credits
+
+Built by nx-mod for the **Nextendo Network**, on the work of the Nextendo Network team — https://nextendo.network. Nextendo is awesome.
