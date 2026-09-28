@@ -359,7 +359,7 @@ func (s *bcatServer) handleNewsList(w http.ResponseWriter, r *http.Request, topi
 	sum := sha256.Sum256(mpack(data))
 	list := omap{
 		{"topic_id", topic},
-		{"service_status", "normal"},
+		{"service_status", "in_service"}, // bcat 22.5.0 accepts "in_service" or "expired" only (else 0x67d)
 		{"na_required", false},
 		{"test_distribution", false},
 		{"directories", []any{omap{

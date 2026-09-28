@@ -4,6 +4,8 @@
 - **Containers rejected**: header version byte set to 1, as bcat requires.
 - **Requests never logged**: every request logged with its status.
 - **News**: catalog, channels, lists and items in the console's formats, encrypted; items are JSON files (NEWS.md).
+- **News lists ignored (no item ever downloaded)**: `service_status` is `in_service`; bcat 22.5.0 rejects anything but
+  `in_service`/`expired` (0x67d).
 
 ## Credits
 

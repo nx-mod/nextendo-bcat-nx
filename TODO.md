@@ -9,7 +9,7 @@
 
 - **Game BCAT data**: `list/nx_data_<title>` still answers invented JSON; serve BCAT-Toolbox's `BcatList` format.
 - **Per-game News channels**: `"game": "<title id>"` in a news file; Diablo III first.
-- **Unknowns**: `shop` button `query` format; `movie` items; `service_status`/`mode`/`digest` values.
+- **Unknowns**: `shop` button `query` format; `movie` items; `mode`/`digest` values.
 - **Remove** the old `/news` JSON and `news.json` once News works.
 
 ## Credits
