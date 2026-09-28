@@ -318,6 +318,11 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 		d = append(d, kv{"latest_news_urls", urls})
 		s.writeNewsContainer(w, mpack(d))
 		return true
+	case strings.HasPrefix(p, "/api/nx/v2/topics/") && strings.HasSuffix(p, "/online_archives"):
+		// A channel's older items (opening a channel asks after its detail). The format is not known: an empty
+		// list, so the channel shows the detail's latest_news_urls.
+		s.writeNewsContainer(w, mpack([]any{}))
+		return true
 	case strings.HasPrefix(p, "/api/nx/v1/topics/") && strings.HasSuffix(p, "/icon"):
 		s.writeNewsContainer(w, defaultNewsImage())
 		return true
@@ -341,6 +346,8 @@ func (s *bcatServer) handleNewsList(w http.ResponseWriter, r *http.Request, topi
 			{"news_id", n.ID},
 			{"version", omap{{"format", 1}, {"semantics", 1}}},
 			{"default_language", "en-US"},
+			{"publishing_time", n.when.Unix()},
+			{"deletion_priority", 100},
 			{"languages", []any{omap{
 				{"language", "en-US"}, {"data_id", n.ID}, {"url", newsDataURL(n)}, {"size", len(c)}, {"overwrite", false},
 			}}},
