@@ -331,7 +331,13 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 		s.writeNewsContainer(w, defaultNewsImage())
 		return true
 	case strings.HasPrefix(p, "/api/nx/v1/titles/") && strings.HasSuffix(p, "/topics"):
-		s.writeNewsContainer(w, mpack([]string{}))
+		// A title's channels, which the console subscribes to. The HOME menu's are the default feed: without
+		// them a console whose news storage was cleared stops fetching the news lists.
+		topics := []string{}
+		if strings.Contains(p, "/0100000000001000/") {
+			topics = []string{"nx_news", "nx_notice"}
+		}
+		s.writeNewsContainer(w, mpack(topics))
 		return true
 	}
 	return false

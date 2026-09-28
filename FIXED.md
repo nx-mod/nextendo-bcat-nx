@@ -7,6 +7,8 @@
 - **News lists ignored (no item ever downloaded)**: `service_status` is `in_service`; bcat 22.5.0 rejects anything but
   `in_service`/`expired` (0x67d).
 - **News images red**: items without their own image (and channel icons) use `default.jpg`, the logo.
+- **No news after Clear news**: the HOME menu title (`titles/0100000000001000/topics`) answers `nx_news` and `nx_notice`,
+  so a console re-subscribes to the default feed.
 
 ## Credits
 
