@@ -175,7 +175,7 @@ func (n newsFile) record() omap {
 		{"version", omap{{"format", 1}, {"semantics", 1}}},
 		{"news_id", n.ID},
 		{"published_at", n.when.Unix()},
-		{"pickup_limit", 1209600},
+		{"pickup_limit", n.when.Unix() + 14*24*3600}, // a time: featured (lock screen, top of News) until then
 		{"priority", n.Priority},
 		{"deletion_priority", 100},
 		{"language", "en-US"},
