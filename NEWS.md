@@ -37,7 +37,7 @@ The console picks new items up the next time it checks (boot, sign-in, or openin
 | `picture` | `true` also shows the image full size in the body | `false` |
 | `button` | a button under the item (below) | none |
 | `movie` | a video URL in the body (untested) | none |
-| `priority` | higher shows first | `50` |
+| `priority` | featured only above 50 (qlaunch queries 51-999, 1000-1999 and 2000+; which screen each tier feeds is untested); `1500` shows on the lock screen | `1500` |
 | `id` | fixed news id (number) | derived from the file name |
 | `extra` | raw fields added to the record as-is, for anything not covered above (see the format below) | none |
 

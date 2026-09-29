@@ -58,7 +58,7 @@ type newsFile struct {
 	Picture  bool           `json:"picture"`  // also show the image full-size in the body
 	Button   *newsButton    `json:"button"`   // optional "more" button
 	Movie    string         `json:"movie"`    // optional video URL in the body
-	Priority int            `json:"priority"` // higher first (default 50)
+	Priority int            `json:"priority"` // featured only above 50; qlaunch queries 51-999, 1000-1999 and 2000+ (default 1500: lock screen)
 	ID       uint32         `json:"id"`       // optional; default derived from the file name
 	Extra    map[string]any `json:"extra"`    // raw fields added to the record as-is (advanced)
 
@@ -103,7 +103,7 @@ func loadNewsDir() []newsFile {
 			n.Channel = nextendoTopic
 		}
 		if n.Priority == 0 {
-			n.Priority = 50
+			n.Priority = 1500 // qlaunch features only priority > 50; 1500 shows on the lock screen
 		}
 		if n.ID == 0 {
 			h := fnv.New32a()
