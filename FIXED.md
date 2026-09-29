@@ -9,8 +9,8 @@
 - **News images red**: items without their own image (and channel icons) use `default.jpg`, the logo.
 - **Nothing on the lock screen**: qlaunch features only `priority` > 50 with a future `pickup_limit` (a time, not a
   duration); items default to priority 1500 and are featured for 14 days after their date (shown on the lock screen).
-- **No news after Clear news**: the HOME menu title (`titles/0100000000001000/topics`) answers `nx_news` and `nx_notice`,
-  so a console re-subscribes to the default feed.
+- **HOME menu title topics empty**: `titles/0100000000001000/topics` answers `nx_news` and `nx_notice` (re-subscribing
+  after Clear news is done on the console, by nextendo-nx).
 
 ## Credits
 
