@@ -184,10 +184,11 @@ func (n newsFile) record() omap {
 		{"topic_id", n.Channel},
 		{"no_photography", 0},
 		{"surprise", 0},
-		{"essential_pickup_limit", 0},
+		{"essential_pickup", omap{{"pickup_limit", n.when.Unix() + 14*24*3600}, {"priority_after", n.Priority}}}, // featured (lock screen)
 		{"movie", 0},
 		{"subject", omap{{"caption", 1}, {"text", n.Title}}},
 		{"topic_name", topicName(n.Channel)},
+		{"topic_image", defaultNewsImage()}, // the channel's icon (Nintendo's own channels have built-in ones)
 		{"list_image", n.img},
 	}
 	if n.Footer != "" {
