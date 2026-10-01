@@ -231,7 +231,17 @@ func fitJPEG(src []byte, w, h int) []byte {
 	}
 	var buf bytes.Buffer
 	jpeg.Encode(&buf, out, &jpeg.Options{Quality: 92})
-	return buf.Bytes()
+	return withJFIF(buf.Bytes())
+}
+
+// withJFIF adds the JFIF APP0 header Go's encoder leaves out, so the images are standard JFIF files like the
+// ones the console's own items carry.
+func withJFIF(b []byte) []byte {
+	if len(b) < 4 || b[0] != 0xFF || b[1] != 0xD8 || (b[2] == 0xFF && b[3] == 0xE0) {
+		return b
+	}
+	app0 := []byte{0xFF, 0xE0, 0x00, 0x10, 'J', 'F', 'I', 'F', 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00}
+	return append(append(append([]byte{}, b[:2]...), app0...), b[2:]...)
 }
 
 // defaultNewsImage is BCAT_NEWS_DIR/default.jpg (the logo), else a plain red square.

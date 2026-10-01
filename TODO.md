@@ -2,9 +2,10 @@
 
 ## In progress
 
-- **Channel page header icon**: Find channels and the News list show the icon (70x70 JPEG in a container: a plain
-  JPEG breaks them), but a channel's own page shows none. Same endpoint, size and decoder (qlaunch 0x65ba0538e0);
-  it is only fetched when `online_archives` parses to its end, so a late check there probably fails.
+- **Icons inside an opened item of a custom channel** (next to the channel header, and on the related-channel
+  buttons): not drawn, though qlaunch's article parser (0x65ba581e60) loads the top-level `topic_image` and each
+  `related_channels[].topic_image` and the item opens. Not the size (70x70), not JFIF, not following the channel:
+  a display condition in the article layout, not found yet. Nintendo's channels use built-in icons.
 - **Opening a channel**: opens; each item's summary now matches qlaunch's parser (358x201 `list_image`, 70x70
   `icon_image`, `url`); confirm the entries show and open.
 - **Nintendo's icon on `nx_news` / `nx_notice` items**: every item now carries our 70x70 `topic_image`; check
