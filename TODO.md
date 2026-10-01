@@ -13,8 +13,10 @@
 
 - **News loading by itself**: the servers drive it, not the console app. Subscriptions: `titles/0100000000001000/
   topics` (HOME menu) lists the default channels and the console auto-subscribes them (status 3 seen for
-  `nx_notice`); confirm after a Clear + reboot, and decide whether `nx_news_nextendo` joins that list. Fetch-now:
-  the penne push (baas-jwks TODO). Status 2 = subscribed (Follow), 3 = auto-subscribed.
+  `nx_notice`). **Our addition:** `nx_news_nextendo` is in that list too, so every console auto-follows the
+  Nextendo channel; untested whether the console accepts a non-Nintendo channel there: check with nextendo-nx
+  Subscribe (subscribe.txt shows each channel's status) after a Clear news + reboot. Fetch-now: the penne push
+  (baas-jwks TODO). Status 2 = subscribed (Follow), 3 = auto-subscribed.
 
 ## Left
 

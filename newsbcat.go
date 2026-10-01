@@ -487,7 +487,9 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 		// them a console whose news storage was cleared stops fetching the news lists.
 		topics := []string{}
 		if strings.Contains(p, "/0100000000001000/") {
-			topics = []string{"nx_news", "nx_notice"}
+			// nx_news and nx_notice are Nintendo's defaults; nextendoTopic is ours, added so every console
+			// follows the Nextendo channel without the user finding it (not something production does).
+			topics = []string{"nx_news", "nx_notice", nextendoTopic}
 		}
 		s.writeNewsContainer(w, mpack(topics))
 		return true

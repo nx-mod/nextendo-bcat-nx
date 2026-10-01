@@ -81,17 +81,27 @@ The console asks, over HTTPS to the stack (sni-router → bcat-nx):
 
 | request | reply |
 |---|---|
+| `bcat-topics …/api/nx/v1/titles/0100000000001000/topics` | the channels every console follows by default |
 | `bcat-topics …/api/nx/v1/topics/catalog` | the channels (Find channels) |
-| `bcat-topics …/api/nx/v1/topics/<channel>/detail`, `/icon` | one channel |
+| `bcat-topics …/api/nx/v1/topics/<channel>/detail`, `/icon` | one channel; the icon is a 70x70 JPEG |
+| `bcat-topics …/api/nx/v2/topics/<channel>/online_archives` | a channel's page: its items, each with a summary URL |
+| `bcat-data …/api/nx/v1/news/<channel>/<id>/summary` | an item as the channel's page lists it (358x201 thumbnail) |
 | `bcat-list …/api/nx/v1/list/<channel>` | the channel's items: ids, URLs, sizes |
 | `bcat-data …/api/nx/v1/news/<channel>/<id>` | one item: the news record |
 
-Every reply is a BCAT content container (MessagePack inside, not encrypted) signed with the stack's BCAT
-key. A stock console only accepts Nintendo's signature; the `nextendo_bcat_sig` Atmosphère patch
-(`atmosphere/exefs_patches/nextendo_bcat_sig/`, for bcat on 22.5.0) makes it accept the stack's.
+**Default channels.** `news` and `notice` are Nintendo's defaults. `nextendo` is **our addition** to that list, so
+every console follows the Nextendo channel without the user finding it; production's list has only Nintendo's.
 
-The news record is the console's own format (the fields in `newsbcat.go`, `record()`), confirmed against
-the local notices dumped from a console with nextendo-nx's **Dump news**.
+**When items arrive.** A console fetches a channel's list when it subscribes to it (Follow) and then on its own
+schedule, hours apart. Making it fetch at once needs the push server (penne), which is not done yet.
+
+Every reply is a BCAT content container: MessagePack inside, AES-128-CTR encrypted with the HOME menu's News
+passphrase, signed with the stack's BCAT key. A stock console only accepts Nintendo's signature; the
+`nextendo_bcat_sig` Atmosphère patch (`atmosphere/exefs_patches/nextendo_bcat_sig/`, for bcat on 22.5.0) makes it
+accept the stack's.
+
+The formats are the console's own: the record from the local notices dumped with nextendo-nx's **Dump news**, the
+rest read from the bcat and HOME menu code of firmware 22.5.0 (sizes and required values are firmware-specific).
 
 ## Credits
 
