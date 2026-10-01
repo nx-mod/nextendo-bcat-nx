@@ -22,7 +22,8 @@ Create `stack/news/<name>.json`:
 That's all a basic item needs. To show a picture, put a JPEG next to it with the same name
 (`stack/news/<name>.jpg`) — it becomes the thumbnail in the News list.
 
-The console picks new items up the next time it checks (boot, sign-in, or opening News).
+The console picks new items up on its own schedule (hours after its last check); a push that makes it check at once
+is not done yet (see TODO.md).
 
 ## Fields
 
@@ -37,7 +38,8 @@ The console picks new items up the next time it checks (boot, sign-in, or openin
 | `picture` | `true` also shows the image full size in the body | `false` |
 | `button` | a button under the item (below) | none |
 | `movie` | a video URL in the body (untested) | none |
-| `priority` | featured only above 50 (qlaunch queries 51-999, 1000-1999 and 2000+; which screen each tier feeds is untested); `1500` shows on the lock screen | `1500` |
+| `featured` | `true` puts it on the lock screen and in the featured row; only the 3 newest featured items stay featured | `false` |
+| `priority` | advanced: 1000 and up is featured (highest first); anything lower is the normal list | `1500` if featured, else `100` |
 | `id` | fixed news id (number) | derived from the file name |
 | `extra` | raw fields added to the record as-is, for anything not covered above (see the format below) | none |
 

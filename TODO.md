@@ -2,8 +2,10 @@
 
 ## In progress
 
-- **Confirm News on a console**: Find channels, the feed, each item (encrypted containers). The console's
-  `nextendo_bcat_sig` now covers every signature check; if it still fails, suspect the catalog format.
+- **Channel icons show a question mark** (Find channels, the custom channel, items of `nx_news_nextendo`): the
+  console fetches `topics/<channel>/icon` (200) and falls back to its built-in `hatena.jpg`. A container and a plain
+  JPEG both fail; the expected format is in qlaunch's code (dump its code region: 12 MB, FTP dropped it).
+- **Opening a channel fails**: `v2/topics/<channel>/online_archives` format unknown (same qlaunch code).
 
 ## Left
 

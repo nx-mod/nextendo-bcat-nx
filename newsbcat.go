@@ -58,7 +58,8 @@ type newsFile struct {
 	Picture  bool           `json:"picture"`  // also show the image full-size in the body
 	Button   *newsButton    `json:"button"`   // optional "more" button
 	Movie    string         `json:"movie"`    // optional video URL in the body
-	Priority int            `json:"priority"` // featured only above 50; qlaunch queries 51-999, 1000-1999 and 2000+ (default 1500: lock screen)
+	Featured bool           `json:"featured"` // on the lock screen and the featured row (the newest 3 only)
+	Priority int            `json:"priority"` // advanced: 1000+ is featured, highest first; default 1500 if featured, else 100
 	ID       uint32         `json:"id"`       // optional; default derived from the file name
 	Extra    map[string]any `json:"extra"`    // raw fields added to the record as-is (advanced)
 
@@ -103,7 +104,10 @@ func loadNewsDir() []newsFile {
 			n.Channel = nextendoTopic
 		}
 		if n.Priority == 0 {
-			n.Priority = 1500 // qlaunch features only priority > 50; 1500 shows on the lock screen
+			n.Priority = normalPriority
+			if n.Featured {
+				n.Priority = featuredPriority
+			}
 		}
 		if n.ID == 0 {
 			h := fnv.New32a()
@@ -126,8 +130,27 @@ func loadNewsDir() []newsFile {
 		out = append(out, n)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].when.After(out[j].when) })
+	// The lock screen has 3 featured slots: only the newest maxFeatured stay featured.
+	featured := 0
+	for i := range out {
+		if out[i].Priority < featuredFloor {
+			continue
+		}
+		if featured++; featured > maxFeatured {
+			out[i].Priority = normalPriority
+		}
+	}
 	return out
 }
+
+// qlaunch (22.5.0) features items of priority 1000 and up, highest first, on the lock screen and the featured
+// row; lower ones (above 50) are the ordinary "latest" list.
+const (
+	featuredFloor    = 1000
+	featuredPriority = 1500
+	normalPriority   = 100
+	maxFeatured      = 3
+)
 
 func parseNewsDate(s, path string) time.Time {
 	for _, layout := range []string{time.RFC3339, "2006-01-02"} {

@@ -7,8 +7,8 @@
 - **News lists ignored (no item ever downloaded)**: `service_status` is `in_service`; bcat 22.5.0 rejects anything but
   `in_service`/`expired` (0x67d).
 - **News images red**: items without their own image (and channel icons) use `default.jpg`, the logo.
-- **Nothing on the lock screen**: qlaunch features only `priority` > 50 with a future `pickup_limit` (a time, not a
-  duration); items default to priority 1500 and are featured for 14 days after their date (shown on the lock screen).
+- **Nothing on the lock screen**: qlaunch features items of `priority` 1000 and up with a future `pickup_limit` (a time,
+  not a duration). `"featured": true` in a news file does it; only the 3 newest stay featured (the lock screen has 3 slots).
 - **HOME menu title topics empty**: `titles/0100000000001000/topics` answers `nx_news` and `nx_notice` (re-subscribing
   after Clear news is done on the console, by nextendo-nx).
 
