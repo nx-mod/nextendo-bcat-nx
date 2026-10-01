@@ -180,27 +180,42 @@ func channelIcon(topic string) []byte {
 			break
 		}
 	}
+	return fitJPEG(src, channelIconSize, channelIconSize)
+}
+
+// fitJPEG returns src as a w x h JPEG: scaled to fit (area average), centred, padded with its corner colour.
+// qlaunch decodes each image into a texture of a fixed size and rejects any other.
+func fitJPEG(src []byte, w, h int) []byte {
 	img, _, err := image.Decode(bytes.NewReader(src))
 	if err != nil {
 		return src
 	}
 	sb := img.Bounds()
-	if sb.Dx() == channelIconSize && sb.Dy() == channelIconSize {
+	if sb.Dx() == w && sb.Dy() == h {
 		return src
 	}
-	out := image.NewRGBA(image.Rect(0, 0, channelIconSize, channelIconSize))
-	for y := 0; y < channelIconSize; y++ {
-		y0, y1 := sb.Min.Y+y*sb.Dy()/channelIconSize, sb.Min.Y+(y+1)*sb.Dy()/channelIconSize
-		for x := 0; x < channelIconSize; x++ {
-			x0, x1 := sb.Min.X+x*sb.Dx()/channelIconSize, sb.Min.X+(x+1)*sb.Dx()/channelIconSize
+	// The scaled size that fits inside w x h.
+	dw, dh := w, sb.Dy()*w/sb.Dx()
+	if dh > h {
+		dw, dh = sb.Dx()*h/sb.Dy(), h
+	}
+	dw, dh = max(dw, 1), max(dh, 1)
+	ox, oy := (w-dw)/2, (h-dh)/2
+	out := image.NewRGBA(image.Rect(0, 0, w, h))
+	cr, cg, cb, _ := img.At(sb.Min.X, sb.Min.Y).RGBA()
+	draw.Draw(out, out.Bounds(), &image.Uniform{color.RGBA{uint8(cr >> 8), uint8(cg >> 8), uint8(cb >> 8), 255}}, image.Point{}, draw.Src)
+	for y := 0; y < dh; y++ {
+		y0, y1 := sb.Min.Y+y*sb.Dy()/dh, sb.Min.Y+(y+1)*sb.Dy()/dh
+		for x := 0; x < dw; x++ {
+			x0, x1 := sb.Min.X+x*sb.Dx()/dw, sb.Min.X+(x+1)*sb.Dx()/dw
 			var r, g, b, n uint32
 			for sy := y0; sy < max(y1, y0+1); sy++ {
 				for sx := x0; sx < max(x1, x0+1); sx++ {
-					cr, cg, cb, _ := img.At(sx, sy).RGBA()
-					r, g, b, n = r+cr>>8, g+cg>>8, b+cb>>8, n+1
+					pr, pg, pb, _ := img.At(sx, sy).RGBA()
+					r, g, b, n = r+pr>>8, g+pg>>8, b+pb>>8, n+1
 				}
 			}
-			out.SetRGBA(x, y, color.RGBA{uint8(r / n), uint8(g / n), uint8(b / n), 255})
+			out.SetRGBA(ox+x, oy+y, color.RGBA{uint8(r / n), uint8(g / n), uint8(b / n), 255})
 		}
 	}
 	var buf bytes.Buffer
@@ -301,16 +316,21 @@ func newsDataURL(n newsFile) string {
 	return fmt.Sprintf("%s/api/nx/v1/news/%s/%d", newsDataHost, n.Channel, n.ID)
 }
 
-// summary is an item as a channel's page lists it (online_archives' summary_url). qlaunch (22.5.0) reads
-// no_photography, subject.text, list_image and an optional movie {url, icon_image}; the full record here
-// showed as an empty entry.
+// summary is an item as a channel's page lists it (online_archives' summary_url), in the shape qlaunch
+// (22.5.0) parses: no_photography, subject.text, movie, icon_image (70x70), list_image (358x201: any other
+// size fails the whole summary) and url, the full item.
 func (n newsFile) summary() omap {
 	return omap{
 		{"no_photography", 0},
 		{"subject", omap{{"text", n.Title}}},
-		{"list_image", n.img},
+		{"movie", 0},
+		{"icon_image", channelIcon(n.Channel)},
+		{"list_image", fitJPEG(n.img, summaryImageW, summaryImageH)},
+		{"url", newsDataURL(n)},
 	}
 }
+
+const summaryImageW, summaryImageH = 358, 201
 
 // News containers are encrypted with the HOME menu's News passphrase and a salt picked by the header's
 // secret index (BCAT-Toolbox's DecryptBCAT). Those values are Nintendo's, so they are not in this repo:

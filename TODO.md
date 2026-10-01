@@ -3,8 +3,8 @@
 ## In progress
 
 - **Channel icons**: now 70x70 JPEGs (what qlaunch decodes); confirm on a console (Find channels, the custom channel).
-- **Opening a channel**: opens (the `online_archives` shape was the cause); each item now has its own summary
-  (`.../news/<channel>/<id>/summary`: `no_photography`, `subject.text`, `list_image`); confirm the entries show.
+- **Opening a channel**: opens; each item's summary now matches qlaunch's parser (358x201 `list_image`, 70x70
+  `icon_image`, `url`); confirm the entries show and open.
 - **Custom channel icon in items** (`topic_image`, 70x70): confirm on a console.
 
 ## Left
