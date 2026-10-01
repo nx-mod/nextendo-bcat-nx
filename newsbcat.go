@@ -301,6 +301,17 @@ func newsDataURL(n newsFile) string {
 	return fmt.Sprintf("%s/api/nx/v1/news/%s/%d", newsDataHost, n.Channel, n.ID)
 }
 
+// summary is an item as a channel's page lists it (online_archives' summary_url). qlaunch (22.5.0) reads
+// no_photography, subject.text, list_image and an optional movie {url, icon_image}; the full record here
+// showed as an empty entry.
+func (n newsFile) summary() omap {
+	return omap{
+		{"no_photography", 0},
+		{"subject", omap{{"text", n.Title}}},
+		{"list_image", n.img},
+	}
+}
+
 // News containers are encrypted with the HOME menu's News passphrase and a salt picked by the header's
 // secret index (BCAT-Toolbox's DecryptBCAT). Those values are Nintendo's, so they are not in this repo:
 // BCAT_NEWS_SECRETS names a local JSON file {"passphrase": "...", "salts": ["...", x32]}. Without it,
@@ -405,7 +416,7 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 				{"news_id", n.ID},
 				{"version", omap{{"format", 1}, {"semantics", 1}}},
 				{"default_language", "en-US"},
-				{"languages", []any{omap{{"language", "en-US"}, {"summary_url", newsDataURL(n)}}}},
+				{"languages", []any{omap{{"language", "en-US"}, {"summary_url", newsDataURL(n) + "/summary"}}}},
 			})
 		}
 		s.writeNewsContainer(w, mpack(omap{{"na_required", false}, {"data_list", list}}))
@@ -467,14 +478,19 @@ func (s *bcatServer) handleNewsList(w http.ResponseWriter, r *http.Request, topi
 // handleNewsData answers /api/nx/v1/news/<channel>/<news_id>: one item.
 func (s *bcatServer) handleNewsData(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/nx/v1/news/"), "/"), "/")
-	if len(parts) != 2 {
+	summary := len(parts) == 3 && parts[2] == "summary"
+	if len(parts) != 2 && !summary {
 		http.NotFound(w, r)
 		return
 	}
 	id, _ := strconv.ParseUint(parts[1], 10, 32)
 	for _, n := range loadNewsDir() {
 		if n.Channel == parts[0] && uint64(n.ID) == id {
-			s.writeNewsContainer(w, mpack(n.record()))
+			if summary {
+				s.writeNewsContainer(w, mpack(n.summary()))
+			} else {
+				s.writeNewsContainer(w, mpack(n.record()))
+			}
 			return
 		}
 	}
