@@ -166,7 +166,48 @@ func parseNewsDate(s, path string) time.Time {
 
 var defaultImage []byte
 
-// defaultNewsImage is a plain Nextendo-red 256x256 JPEG, for items without an image.
+// channelIconSize is the channel icon's side: qlaunch (22.5.0) decodes it into a 70x70 texture and shows a
+// question mark for any other size.
+const channelIconSize = 70
+
+// channelIcon is the channel's icon, a 70x70 JPEG: BCAT_NEWS_DIR/<channel>-icon.jpg or icon.jpg if there is
+// one, else default.jpg; scaled to size (area average).
+func channelIcon(topic string) []byte {
+	src := defaultNewsImage()
+	for _, name := range []string{topic + "-icon.jpg", "icon.jpg"} {
+		if b, err := os.ReadFile(filepath.Join(newsDir, name)); err == nil && len(b) > 0 {
+			src = b
+			break
+		}
+	}
+	img, _, err := image.Decode(bytes.NewReader(src))
+	if err != nil {
+		return src
+	}
+	sb := img.Bounds()
+	if sb.Dx() == channelIconSize && sb.Dy() == channelIconSize {
+		return src
+	}
+	out := image.NewRGBA(image.Rect(0, 0, channelIconSize, channelIconSize))
+	for y := 0; y < channelIconSize; y++ {
+		y0, y1 := sb.Min.Y+y*sb.Dy()/channelIconSize, sb.Min.Y+(y+1)*sb.Dy()/channelIconSize
+		for x := 0; x < channelIconSize; x++ {
+			x0, x1 := sb.Min.X+x*sb.Dx()/channelIconSize, sb.Min.X+(x+1)*sb.Dx()/channelIconSize
+			var r, g, b, n uint32
+			for sy := y0; sy < max(y1, y0+1); sy++ {
+				for sx := x0; sx < max(x1, x0+1); sx++ {
+					cr, cg, cb, _ := img.At(sx, sy).RGBA()
+					r, g, b, n = r+cr>>8, g+cg>>8, b+cb>>8, n+1
+				}
+			}
+			out.SetRGBA(x, y, color.RGBA{uint8(r / n), uint8(g / n), uint8(b / n), 255})
+		}
+	}
+	var buf bytes.Buffer
+	jpeg.Encode(&buf, out, &jpeg.Options{Quality: 92})
+	return buf.Bytes()
+}
+
 // defaultNewsImage is BCAT_NEWS_DIR/default.jpg (the logo), else a plain red square.
 func defaultNewsImage() []byte {
 	if b, err := os.ReadFile(filepath.Join(newsDir, "default.jpg")); err == nil && len(b) > 0 {
@@ -350,7 +391,8 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 		s.writeNewsContainer(w, mpack([]any{}))
 		return true
 	case strings.HasPrefix(p, "/api/nx/v1/topics/") && strings.HasSuffix(p, "/icon"):
-		s.writeNewsContainer(w, defaultNewsImage())
+		topic := strings.TrimSuffix(strings.TrimPrefix(p, "/api/nx/v1/topics/"), "/icon")
+		s.writeNewsContainer(w, channelIcon(topic))
 		return true
 	case strings.HasPrefix(p, "/api/nx/v1/titles/") && strings.HasSuffix(p, "/topics"):
 		// A title's channels, which the console subscribes to. The HOME menu's are the default feed: without

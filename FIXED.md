@@ -9,6 +9,8 @@
 - **News images red**: items without their own image (and channel icons) use `default.jpg`, the logo.
 - **Nothing on the lock screen**: qlaunch features items of `priority` 1000 and up with a future `pickup_limit` (a time,
   not a duration). `"featured": true` in a news file does it; only the 3 newest stay featured (the lock screen has 3 slots).
+- **Channel icons were a question mark**: qlaunch decodes the icon into a 70x70 texture and rejects any other size;
+  icons are the logo scaled to 70x70 (or `<channel>-icon.jpg` / `icon.jpg` in the news folder).
 - **HOME menu title topics empty**: `titles/0100000000001000/topics` answers `nx_news` and `nx_notice` (re-subscribing
   after Clear news is done on the console, by nextendo-nx).
 

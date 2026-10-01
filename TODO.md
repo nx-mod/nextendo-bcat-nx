@@ -2,9 +2,7 @@
 
 ## In progress
 
-- **Channel icons show a question mark** (Find channels, the custom channel, items of `nx_news_nextendo`): the
-  console fetches `topics/<channel>/icon` (200) and falls back to its built-in `hatena.jpg`. A container and a plain
-  JPEG both fail; the expected format is in qlaunch's code (dump its code region: 12 MB, FTP dropped it).
+- **Channel icons**: now 70x70 JPEGs (what qlaunch decodes); confirm on a console (Find channels, the custom channel).
 - **Opening a channel fails**: `v2/topics/<channel>/online_archives` format unknown (same qlaunch code).
 
 ## Left

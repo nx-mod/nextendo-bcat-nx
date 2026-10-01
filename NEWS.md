@@ -43,6 +43,9 @@ is not done yet (see TODO.md).
 | `id` | fixed news id (number) | derived from the file name |
 | `extra` | raw fields added to the record as-is, for anything not covered above (see the format below) | none |
 
+Channel icons: `<channel>-icon.jpg` or `icon.jpg` in the folder, else `default.jpg`; served as a 70x70 JPEG (the only
+size the console shows). Nintendo's own channels (`news`, `notice`) keep their built-in icons.
+
 Images: JPEG, up to 1 MB. The console's own items use a wide thumbnail; any size shows.
 
 ### Buttons
