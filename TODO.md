@@ -3,7 +3,9 @@
 ## In progress
 
 - **Channel icons**: now 70x70 JPEGs (what qlaunch decodes); confirm on a console (Find channels, the custom channel).
-- **Opening a channel fails**: `v2/topics/<channel>/online_archives` format unknown (same qlaunch code).
+- **Opening a channel**: `online_archives` now has qlaunch's shape (`na_required`, `data_list` with `summary_url`);
+  confirm on a console. `summary_url` points at the full item: the summary's own format is not checked yet.
+- **Custom channel icon in items** (`topic_image`, 70x70): confirm on a console.
 
 ## Left
 

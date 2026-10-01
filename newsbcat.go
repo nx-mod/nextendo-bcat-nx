@@ -251,8 +251,14 @@ func (n newsFile) record() omap {
 		{"essential_pickup", omap{{"pickup_limit", n.when.Unix() + 14*24*3600}, {"priority_after", n.Priority}}}, // featured (lock screen)
 		{"movie", 0},
 		{"subject", omap{{"caption", 1}, {"text", n.Title}}},
-		{"topic_name", topicName(n.Channel)}, {"list_image", n.img},
+		{"topic_name", topicName(n.Channel)},
 	}
+	// A custom channel's icon travels in its items (70x70, as the catalog's); Nintendo's own channels have
+	// built-in icons.
+	if n.Channel != defaultTopic && n.Channel != "nx_notice" {
+		r = append(r, kv{"topic_image", channelIcon(n.Channel)})
+	}
+	r = append(r, kv{"list_image", n.img})
 	if n.Footer != "" {
 		r = append(r, kv{"footer", omap{{"text", n.Footer}}})
 	}
@@ -386,9 +392,23 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 		s.writeNewsContainer(w, mpack(d))
 		return true
 	case strings.HasPrefix(p, "/api/nx/v2/topics/") && strings.HasSuffix(p, "/online_archives"):
-		// A channel's older items (opening a channel asks after its detail). The format is not known: an empty
-		// list, so the channel shows the detail's latest_news_urls.
-		s.writeNewsContainer(w, mpack([]any{}))
+		// A channel's items, asked when a channel is opened (after its detail). The shape is what qlaunch
+		// (22.5.0) reads: na_required and data_list, each item's languages carrying a summary_url. An array
+		// here made it retry forever ("failed to load").
+		topic := strings.TrimSuffix(strings.TrimPrefix(p, "/api/nx/v2/topics/"), "/online_archives")
+		list := []any{}
+		for _, n := range items {
+			if n.Channel != topic {
+				continue
+			}
+			list = append(list, omap{
+				{"news_id", n.ID},
+				{"version", omap{{"format", 1}, {"semantics", 1}}},
+				{"default_language", "en-US"},
+				{"languages", []any{omap{{"language", "en-US"}, {"summary_url", newsDataURL(n)}}}},
+			})
+		}
+		s.writeNewsContainer(w, mpack(omap{{"na_required", false}, {"data_list", list}}))
 		return true
 	case strings.HasPrefix(p, "/api/nx/v1/topics/") && strings.HasSuffix(p, "/icon"):
 		topic := strings.TrimSuffix(strings.TrimPrefix(p, "/api/nx/v1/topics/"), "/icon")
