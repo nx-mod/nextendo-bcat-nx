@@ -2,7 +2,9 @@
 
 ## In progress
 
-- **Channel icons**: now 70x70 JPEGs (what qlaunch decodes); confirm on a console (Find channels, the custom channel).
+- **Channel page header icon**: Find channels and the News list show the icon (70x70 JPEG in a container: a plain
+  JPEG breaks them), but a channel's own page shows none. Same endpoint, size and decoder (qlaunch 0x65ba0538e0);
+  it is only fetched when `online_archives` parses to its end, so a late check there probably fails.
 - **Opening a channel**: opens; each item's summary now matches qlaunch's parser (358x201 `list_image`, 70x70
   `icon_image`, `url`); confirm the entries show and open.
 - **Nintendo's icon on `nx_news` / `nx_notice` items**: every item now carries our 70x70 `topic_image`; check
