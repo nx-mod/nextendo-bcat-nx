@@ -8,6 +8,11 @@
 - **Nintendo's icon on `nx_news` / `nx_notice` items**: every item now carries our 70x70 `topic_image`; check
   whether it replaces the built-in icon there (it works for the custom channel).
 
+- **No channel icon inside an opened item** (the News list shows it): `related_channels` did not bring it; the
+  article header's source is not found yet.
+- **News does not load by itself after Clear news / a reboot**: the console fetches lists on its own schedule;
+  needs the penne push (baas-jwks TODO).
+
 ## Left
 
 - **Game BCAT data**: `list/nx_data_<title>` still answers invented JSON; serve BCAT-Toolbox's `BcatList` format.
