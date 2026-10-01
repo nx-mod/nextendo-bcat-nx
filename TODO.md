@@ -5,7 +5,8 @@
 - **Channel icons**: now 70x70 JPEGs (what qlaunch decodes); confirm on a console (Find channels, the custom channel).
 - **Opening a channel**: opens; each item's summary now matches qlaunch's parser (358x201 `list_image`, 70x70
   `icon_image`, `url`); confirm the entries show and open.
-- **Custom channel icon in items** (`topic_image`, 70x70): confirm on a console.
+- **Nintendo's icon on `nx_news` / `nx_notice` items**: every item now carries our 70x70 `topic_image`; check
+  whether it replaces the built-in icon there (it works for the custom channel).
 
 ## Left
 

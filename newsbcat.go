@@ -268,12 +268,8 @@ func (n newsFile) record() omap {
 		{"subject", omap{{"caption", 1}, {"text", n.Title}}},
 		{"topic_name", topicName(n.Channel)},
 	}
-	// A custom channel's icon travels in its items (70x70, as the catalog's); Nintendo's own channels have
-	// built-in icons.
-	if n.Channel != defaultTopic && n.Channel != "nx_notice" {
-		r = append(r, kv{"topic_image", channelIcon(n.Channel)})
-	}
-	r = append(r, kv{"list_image", n.img})
+	// The channel's icon travels in its items (70x70, as the catalog's).
+	r = append(r, kv{"topic_image", channelIcon(n.Channel)}, kv{"list_image", n.img})
 	if n.Footer != "" {
 		r = append(r, kv{"footer", omap{{"text", n.Footer}}})
 	}

@@ -10,7 +10,8 @@
 - **Nothing on the lock screen**: qlaunch features items of `priority` 1000 and up with a future `pickup_limit` (a time,
   not a duration). `"featured": true` in a news file does it; only the 3 newest stay featured (the lock screen has 3 slots).
 - **Channel icons were a question mark**: qlaunch decodes the icon into a 70x70 texture and rejects any other size;
-  icons are the logo scaled to 70x70 (or `<channel>-icon.jpg` / `icon.jpg` in the news folder).
+  icons are the logo scaled to 70x70 (or `<channel>-icon.jpg` / `icon.jpg` in the news folder), and each item
+  carries it as `topic_image` (the icon the News list shows for a custom channel).
 - **"Failed to load" opening a channel**: `online_archives` is a map (`na_required`, `data_list` with a `summary_url`
   per item), not a list.
 - **HOME menu title topics empty**: `titles/0100000000001000/topics` answers `nx_news` and `nx_notice` (re-subscribing
