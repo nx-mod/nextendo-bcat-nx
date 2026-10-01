@@ -268,8 +268,17 @@ func (n newsFile) record() omap {
 		{"subject", omap{{"caption", 1}, {"text", n.Title}}},
 		{"topic_name", topicName(n.Channel)},
 	}
-	// The channel's icon travels in its items (70x70, as the catalog's).
-	r = append(r, kv{"topic_image", channelIcon(n.Channel)}, kv{"list_image", n.img})
+	// The channel's icon travels in its items (70x70, as the catalog's), and an opened item's "related
+	// channels" section is its related_channels list (qlaunch 22.5.0 reads these five keys): its own channel.
+	icon := channelIcon(n.Channel)
+	r = append(r, kv{"topic_image", icon}, kv{"list_image", n.img},
+		kv{"related_channels", []any{omap{
+			{"topic_id", n.Channel},
+			{"topic_name", topicName(n.Channel)},
+			{"topic_publisher", newsPublisher},
+			{"topic_image", icon},
+			{"topic_important", 0},
+		}}})
 	if n.Footer != "" {
 		r = append(r, kv{"footer", omap{{"text", n.Footer}}})
 	}
@@ -327,6 +336,9 @@ func (n newsFile) summary() omap {
 }
 
 const summaryImageW, summaryImageH = 358, 201
+
+// newsPublisher is the publisher shown for every channel.
+const newsPublisher = "Nextendo Network"
 
 // News containers are encrypted with the HOME menu's News passphrase and a salt picked by the header's
 // secret index (BCAT-Toolbox's DecryptBCAT). Those values are Nintendo's, so they are not in this repo:
@@ -390,7 +402,7 @@ func channelEntry(topic string, items []newsFile) omap {
 	return omap{
 		{"topic_id", topic},
 		{"name", topicName(topic)},
-		{"publisher", "Nextendo Network"},
+		{"publisher", newsPublisher},
 		{"description", "News from the Nextendo Network."},
 		{"publishing_time", int64(1735689600)},
 		{"last_posted_at", last},
