@@ -14,6 +14,8 @@
   carries it as `topic_image` (the icon the News list shows for a custom channel).
 - **"Failed to load" opening a channel**: `online_archives` is a map (`na_required`, `data_list` with a `summary_url`
   per item), not a list.
+- **No channel in an opened item**: items carry `related_channels` (their own channel, plus a news file's `related`
+  list); **View articles** there opens the channel.
 - **HOME menu title topics empty**: `titles/0100000000001000/topics` answers `nx_news` and `nx_notice` (re-subscribing
   after Clear news is done on the console, by nextendo-nx).
 

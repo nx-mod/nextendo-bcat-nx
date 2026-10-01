@@ -39,6 +39,7 @@ is not done yet (see TODO.md).
 | `button` | a button under the item (below) | none |
 | `movie` | a video URL in the body (untested) | none |
 | `featured` | `true` puts it on the lock screen and in the featured row; only the 3 newest featured items stay featured | `false` |
+| `related` | other channels shown under **Related channels** in the opened item, e.g. `["nextendo", "notice"]` (its own channel is always there) | none |
 | `priority` | advanced: 1000 and up is featured (highest first); anything lower is the normal list | `1500` if featured, else `100` |
 | `id` | fixed news id (number) | derived from the file name |
 | `extra` | raw fields added to the record as-is, for anything not covered above (see the format below) | none |

@@ -58,6 +58,7 @@ type newsFile struct {
 	Picture  bool           `json:"picture"`  // also show the image full-size in the body
 	Button   *newsButton    `json:"button"`   // optional "more" button
 	Movie    string         `json:"movie"`    // optional video URL in the body
+	Related  []string       `json:"related"`  // other channels listed under "Related channels" in the opened item
 	Featured bool           `json:"featured"` // on the lock screen and the featured row (the newest 3 only)
 	Priority int            `json:"priority"` // advanced: 1000+ is featured, highest first; default 1500 if featured, else 100
 	ID       uint32         `json:"id"`       // optional; default derived from the file name
@@ -75,6 +76,20 @@ type newsButton struct {
 	TitleID string `json:"title_id"` // game
 	Query   string `json:"query"`    // shop
 	Applet  int    `json:"applet"`   // settings: system applet type (2 parental controls, 4 news settings)
+}
+
+// channelTopic is a news file's channel name as a topic id: news (or nothing), notice and nextendo are the
+// short names; anything else is taken as the topic id itself.
+func channelTopic(c string) string {
+	switch c {
+	case "", "news":
+		return defaultTopic
+	case "notice":
+		return "nx_notice"
+	case "nextendo":
+		return nextendoTopic
+	}
+	return c
 }
 
 // loadNewsDir reads every item, newest first. Bad files are logged and skipped.
@@ -95,13 +110,9 @@ func loadNewsDir() []newsFile {
 		if n.Title == "" {
 			n.Title = n.name
 		}
-		switch n.Channel {
-		case "", "news":
-			n.Channel = defaultTopic
-		case "notice":
-			n.Channel = "nx_notice"
-		case "nextendo":
-			n.Channel = nextendoTopic
+		n.Channel = channelTopic(n.Channel)
+		for i, c := range n.Related {
+			n.Related[i] = channelTopic(c)
 		}
 		if n.Priority == 0 {
 			n.Priority = normalPriority
@@ -269,16 +280,24 @@ func (n newsFile) record() omap {
 		{"topic_name", topicName(n.Channel)},
 	}
 	// The channel's icon travels in its items (70x70, as the catalog's), and an opened item's "related
-	// channels" section is its related_channels list (qlaunch 22.5.0 reads these five keys): its own channel.
-	icon := channelIcon(n.Channel)
-	r = append(r, kv{"topic_image", icon}, kv{"list_image", n.img},
-		kv{"related_channels", []any{omap{
-			{"topic_id", n.Channel},
-			{"topic_name", topicName(n.Channel)},
+	// channels" section is its related_channels list (qlaunch 22.5.0 reads these five keys): its own channel,
+	// then the news file's "related" ones.
+	related := []any{}
+	seen := map[string]bool{}
+	for _, c := range append([]string{n.Channel}, n.Related...) {
+		if seen[c] {
+			continue
+		}
+		seen[c] = true
+		related = append(related, omap{
+			{"topic_id", c},
+			{"topic_name", topicName(c)},
 			{"topic_publisher", newsPublisher},
-			{"topic_image", icon},
+			{"topic_image", channelIcon(c)},
 			{"topic_important", 0},
-		}}})
+		})
+	}
+	r = append(r, kv{"topic_image", channelIcon(n.Channel)}, kv{"list_image", n.img}, kv{"related_channels", related})
 	if n.Footer != "" {
 		r = append(r, kv{"footer", omap{{"text", n.Footer}}})
 	}
