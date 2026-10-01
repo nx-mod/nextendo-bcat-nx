@@ -23,7 +23,10 @@
 
 ## Left
 
-- **Game BCAT data** (in-game content, e.g. Diablo III): `list/nx_data_<title>` answers 400. Needs, per game, its
+- **Game BCAT data** (in-game content): only some online games use BCAT (on this console: Smash Bros. Ultimate,
+  Super Mario Bros. 35, Borderlands GOTY, Pokémon Legends Arceus, Marvel Ultimate Alliance 3 — not Diablo III).
+  `list/nx_data_<title>` answers 400; to serve a game it needs that game's own passphrase (nextendo-nx Game data
+  writes them to the SD card) and title id, and the files the game expects (BCAT-Toolbox `BcatList` format).
   BCAT passphrase (nextendo-nx → Diagnostics → Game data writes them to the SD card) and what files the game
   expects; the list format is BCAT-Toolbox's `BcatList`. Containers are encrypted with the game's own passphrase
   and title id, not the HOME menu's.
