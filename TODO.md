@@ -11,8 +11,10 @@
 - **Nintendo's icon on `nx_news` / `nx_notice` items**: every item now carries our 70x70 `topic_image`; check
   whether it replaces the built-in icon there (it works for the custom channel).
 
-- **News does not load by itself after Clear news / a reboot**: the console fetches lists on its own schedule;
-  needs the penne push (baas-jwks TODO).
+- **News loading by itself**: the servers drive it, not the console app. Subscriptions: `titles/0100000000001000/
+  topics` (HOME menu) lists the default channels and the console auto-subscribes them (status 3 seen for
+  `nx_notice`); confirm after a Clear + reboot, and decide whether `nx_news_nextendo` joins that list. Fetch-now:
+  the penne push (baas-jwks TODO). Status 2 = subscribed (Follow), 3 = auto-subscribed.
 
 ## Left
 
