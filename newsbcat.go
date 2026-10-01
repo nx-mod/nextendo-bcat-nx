@@ -47,6 +47,73 @@ const (
 
 var newsDir = envOr("BCAT_NEWS_DIR", "news")
 
+// newsChannel is a custom channel, defined in BCAT_NEWS_DIR/channels.json (see NEWS.md).
+type newsChannel struct {
+	Name        string   `json:"name"`        // short name used in news files ("channel": "<name>")
+	Topic       string   `json:"topic"`       // topic id; default nx_news_<name>
+	Title       string   `json:"title"`       // shown as the channel's name
+	Description string   `json:"description"` // shown on the channel's page
+	Publisher   string   `json:"publisher"`   // default newsPublisher
+	Games       []string `json:"games"`       // title ids (16 hex digits) whose channel this is
+	Default     bool     `json:"default"`     // every console follows it (the HOME menu's list)
+}
+
+// builtinChannels are always there: the Nextendo channel, followed by every console.
+var builtinChannels = []newsChannel{{
+	Name: "nextendo", Topic: nextendoTopic, Title: "Nextendo",
+	Description: "News from the Nextendo Network.", Default: true,
+}}
+
+// newsChannels is the built-in channels then channels.json's, re-read on every request. A channel there with
+// a built-in's name or topic replaces it.
+func newsChannels() []newsChannel {
+	out := append([]newsChannel{}, builtinChannels...)
+	raw, err := os.ReadFile(filepath.Join(newsDir, "channels.json"))
+	if err != nil {
+		return out
+	}
+	var defs []newsChannel
+	if err := json.Unmarshal(raw, &defs); err != nil {
+		log.Printf("[BCAT news] channels.json: %v (ignored)", err)
+		return out
+	}
+	for _, c := range defs {
+		c.Name = strings.ToLower(strings.TrimSpace(c.Name))
+		if c.Topic == "" && c.Name != "" {
+			c.Topic = "nx_news_" + c.Name
+		}
+		if c.Topic == "" || c.Topic == defaultTopic || c.Topic == "nx_notice" {
+			continue
+		}
+		if c.Title == "" {
+			c.Title = c.Name
+		}
+		for i := range c.Games {
+			c.Games[i] = strings.ToLower(strings.TrimPrefix(c.Games[i], "0x"))
+		}
+		replaced := false
+		for i := range out {
+			if out[i].Topic == c.Topic || (c.Name != "" && out[i].Name == c.Name) {
+				out[i], replaced = c, true
+			}
+		}
+		if !replaced {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// channelByTopic is the custom channel with that topic id, nil for Nintendo's own or an unknown one.
+func channelByTopic(topic string) *newsChannel {
+	for _, c := range newsChannels() {
+		if c.Topic == topic {
+			return &c
+		}
+	}
+	return nil
+}
+
 // newsFile is one item as written in BCAT_NEWS_DIR/<name>.json (see NEWS.md).
 type newsFile struct {
 	Title    string         `json:"title"`
@@ -78,16 +145,19 @@ type newsButton struct {
 	Applet  int    `json:"applet"`   // settings: system applet type (2 parental controls, 4 news settings)
 }
 
-// channelTopic is a news file's channel name as a topic id: news (or nothing), notice and nextendo are the
-// short names; anything else is taken as the topic id itself.
+// channelTopic is a news file's channel name as a topic id: news (or nothing) and notice are Nintendo's, then
+// the custom channels' short names (nextendo, and channels.json's); anything else is taken as the topic id.
 func channelTopic(c string) string {
 	switch c {
 	case "", "news":
 		return defaultTopic
 	case "notice":
 		return "nx_notice"
-	case "nextendo":
-		return nextendoTopic
+	}
+	for _, ch := range newsChannels() {
+		if ch.Name == strings.ToLower(c) {
+			return ch.Topic
+		}
 	}
 	return c
 }
@@ -260,11 +330,11 @@ func defaultNewsImage() []byte {
 }
 
 func topicName(topic string) string {
-	switch topic {
-	case nextendoTopic:
-		return "Nextendo"
-	case "nx_notice":
+	if topic == "nx_notice" {
 		return "Nextendo Notices"
+	}
+	if c := channelByTopic(topic); c != nil {
+		return c.Title
 	}
 	return "Nextendo Network"
 }
@@ -302,7 +372,7 @@ func (n newsFile) record() omap {
 		related = append(related, omap{
 			{"topic_id", c},
 			{"topic_name", topicName(c)},
-			{"topic_publisher", newsPublisher},
+			{"topic_publisher", topicPublisher(c)},
 			{"topic_image", channelIcon(c)},
 			{"topic_important", 0},
 		})
@@ -366,8 +436,15 @@ func (n newsFile) summary() omap {
 
 const summaryImageW, summaryImageH = 358, 201
 
-// newsPublisher is the publisher shown for every channel.
+// newsPublisher is the publisher shown for a channel that names none.
 const newsPublisher = "Nextendo Network"
+
+func topicPublisher(topic string) string {
+	if c := channelByTopic(topic); c != nil && c.Publisher != "" {
+		return c.Publisher
+	}
+	return newsPublisher
+}
 
 // News containers are encrypted with the HOME menu's News passphrase and a salt picked by the header's
 // secret index (BCAT-Toolbox's DecryptBCAT). Those values are Nintendo's, so they are not in this repo:
@@ -428,11 +505,15 @@ func channelEntry(topic string, items []newsFile) omap {
 			last = n.when.Unix()
 		}
 	}
+	publisher, description := topicPublisher(topic), "News from the Nextendo Network."
+	if c := channelByTopic(topic); c != nil && c.Description != "" {
+		description = c.Description
+	}
 	return omap{
 		{"topic_id", topic},
 		{"name", topicName(topic)},
-		{"publisher", newsPublisher},
-		{"description", "News from the Nextendo Network."},
+		{"publisher", publisher},
+		{"description", description},
 		{"publishing_time", int64(1735689600)},
 		{"last_posted_at", last},
 		{"important", false},
@@ -445,7 +526,11 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 	items := loadNewsDir()
 	switch {
 	case p == "/api/nx/v1/topics/catalog":
-		s.writeNewsContainer(w, mpack([]omap{channelEntry(nextendoTopic, items)}))
+		catalog := []omap{}
+		for _, c := range newsChannels() {
+			catalog = append(catalog, channelEntry(c.Topic, items))
+		}
+		s.writeNewsContainer(w, mpack(catalog))
 		return true
 	case strings.HasPrefix(p, "/api/nx/v1/topics/") && strings.HasSuffix(p, "/detail"):
 		topic := strings.TrimSuffix(strings.TrimPrefix(p, "/api/nx/v1/topics/"), "/detail")
@@ -485,11 +570,23 @@ func (s *bcatServer) handleNewsTopics(w http.ResponseWriter, r *http.Request) bo
 	case strings.HasPrefix(p, "/api/nx/v1/titles/") && strings.HasSuffix(p, "/topics"):
 		// A title's channels, which the console subscribes to. The HOME menu's are the default feed: without
 		// them a console whose news storage was cleared stops fetching the news lists.
+		title := strings.ToLower(strings.TrimSuffix(strings.TrimPrefix(p, "/api/nx/v1/titles/"), "/topics"))
 		topics := []string{}
-		if strings.Contains(p, "/0100000000001000/") {
-			// nx_news and nx_notice are Nintendo's defaults; nextendoTopic is ours, added so every console
-			// follows the Nextendo channel without the user finding it (not something production does).
-			topics = []string{"nx_news", "nx_notice", nextendoTopic}
+		if title == "0100000000001000" {
+			// nx_news and nx_notice are Nintendo's defaults; the custom channels marked default (the Nextendo
+			// channel) are ours, added so every console follows them without the user finding them (not
+			// something production does).
+			topics = []string{"nx_news", "nx_notice"}
+		}
+		for _, c := range newsChannels() {
+			if title == "0100000000001000" && c.Default {
+				topics = append(topics, c.Topic)
+			}
+			for _, g := range c.Games {
+				if g == title {
+					topics = append(topics, c.Topic)
+				}
+			}
 		}
 		s.writeNewsContainer(w, mpack(topics))
 		return true

@@ -18,10 +18,12 @@
   Subscribe (subscribe.txt shows each channel's status) after a Clear news + reboot. Fetch-now: the penne push
   (baas-jwks TODO). Status 2 = subscribed (Follow), 3 = auto-subscribed.
 
+- **Custom channels (`channels.json`)**: Diablo III is defined (`nx_news_diablo3`, game 01001b300b9be000) with a
+  test item; confirm on a console: Find channels, its page, and whether the game's own News link opens it.
+
 ## Left
 
 - **Game BCAT data**: `list/nx_data_<title>` still answers invented JSON; serve BCAT-Toolbox's `BcatList` format.
-- **Per-game News channels**: `"game": "<title id>"` in a news file; Diablo III first.
 - **New items reach consoles only on their next scheduled check** (hours after a successful one): send the npns
   push that makes a console fetch now (production does), when a news file is added or changed.
 - **`expired` channels**: lists always say `in_service`; add a way to retire a channel (`service_status: expired`)

@@ -33,7 +33,7 @@ is not done yet (see TODO.md).
 | `body` | the text | — |
 | `footer` | small text under the body | none |
 | `date` | `YYYY-MM-DD` or `2026-09-28T10:00:00Z`; newest shows first | the file's time |
-| `channel` | `news` (main feed, everyone sees it), `notice` (notices), `nextendo` (the Nextendo channel, found under **Find channels**) | `news` |
+| `channel` | `news` (main feed, everyone sees it), `notice` (notices), `nextendo` (the Nextendo channel), or a channel from `channels.json` (below) | `news` |
 | `image` | another image file in the folder to use | `<name>.jpg` if it exists, else `default.jpg` (the logo) |
 | `picture` | `true` also shows the image full size in the body | `false` |
 | `button` | a button under the item (below) | none |
@@ -43,6 +43,31 @@ is not done yet (see TODO.md).
 | `priority` | advanced: 1000 and up is featured (highest first); anything lower is the normal list | `1500` if featured, else `100` |
 | `id` | fixed news id (number) | derived from the file name |
 | `extra` | raw fields added to the record as-is, for anything not covered above (see the format below) | none |
+
+## Channels
+
+`news` and `notice` are Nintendo's own channels; `nextendo` is built in. More go in `channels.json`, in the same
+folder:
+
+```json
+[
+  { "name": "diablo3", "title": "Diablo III",
+    "description": "News for Diablo III: Eternal Collection on the Nextendo Network.",
+    "games": ["01001b300b9be000"] }
+]
+```
+
+| field | what | default |
+|---|---|---|
+| `name` | short name, used as `"channel"` in news files | — |
+| `title` | the channel's name on the console | the name |
+| `description` | shown on the channel's page | a generic line |
+| `publisher` | shown under the name | `Nextendo Network` |
+| `games` | title ids whose channel this is: the console asks for a game's channels by title id | none |
+| `default` | `true`: every console follows it without the user finding it (as `nextendo` does) | `false` |
+| `topic` | the topic id | `nx_news_<name>` |
+
+A channel appears under **Find channels**; its items reach consoles that follow it.
 
 Channel icons: `<channel>-icon.jpg` or `icon.jpg` in the folder, else `default.jpg`; served as a 70x70 JPEG (the only
 size the console shows). Nintendo's own channels (`news`, `notice`) keep their built-in icons.
