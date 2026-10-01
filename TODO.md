@@ -23,7 +23,10 @@
 
 ## Left
 
-- **Game BCAT data**: `list/nx_data_<title>` still answers invented JSON; serve BCAT-Toolbox's `BcatList` format.
+- **Game BCAT data** (in-game content, e.g. Diablo III): `list/nx_data_<title>` answers 400. Needs, per game, its
+  BCAT passphrase (nextendo-nx → Diagnostics → Game data writes them to the SD card) and what files the game
+  expects; the list format is BCAT-Toolbox's `BcatList`. Containers are encrypted with the game's own passphrase
+  and title id, not the HOME menu's.
 - **New items reach consoles only on their next scheduled check** (hours after a successful one): send the npns
   push that makes a console fetch now (production does), when a news file is added or changed.
 - **`expired` channels**: lists always say `in_service`; add a way to retire a channel (`service_status: expired`)
